@@ -436,7 +436,7 @@ string simulate(vector<int> start_st, vector<vector < tuple < int, int, bool >>>
         
         for(int i = 0;i<dfa_list.size();i++){
             string sub = input.substr(start,end-start+1);
-            if(check(sub,dfa_list[i],start_st[i])){
+            if(check(sub,dfa_list[i],start_st[i]) && sub!=""){
                 ans.push_back(make_pair(sub,(i+1)+'0'));
                 start = end+1;
                 end = input.size()-1;
