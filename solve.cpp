@@ -416,64 +416,84 @@ pair < int, vector < tuple < int, int, bool > > > minimize_dfa(vector < dst > df
   return make_pair(strt, ret);
 }
 
-string simulate(vector<int> start_st, vector<vector < tuple < int, int, bool >>> min_dfa, string input) {
-  string output = "";
-
-  cout << "-----------------------------------------" << endl;
-  cout << "Input\t|\tCurrent\t|\tNext\t|" << endl;
-  cout << "-----------------------------------------" << endl;
-  for (int j = 0; j < input.size(); j++) {
+bool check(string toCheck, vector<tuple<int,int,bool>> dfa,int start_state){
     int curr_state, next_state;
-    curr_state = start_st;
-    cout << "big loop ran\n";
-    int max = -1;
-    for (unsigned i = j; i < input.size(); i++) {
-      if (input[i] == 'a')
-        next_state = get < 0 > (min_dfa[curr_state]);
-      else
-        next_state = get < 1 > (min_dfa[curr_state]);
-      cout << input[i] << "\t|\t" << curr_state << "\t|\t" << next_state << "\t|\n";
-      curr_state = next_state;
-
-      if (curr_state >= 0 && get < 2 > (min_dfa[curr_state])) {
-        max = i;
-        continue;
-      }
-      if (curr_state == 0) break;
-
+    curr_state = start_state;
+    
+    for(int i = 0;i<toCheck.size();i++){
+        if(toCheck[i] == 'a'){
+            next_state = get < 0 > (dfa[curr_state]);
+        }
+        else{
+            next_state = get < 1 > (dfa[curr_state]);
+        }
+        curr_state = next_state;
     }
-    if (max >= j) {
-      output.push_back('$');
-      cout << "j=" << j << "max=" << max << "\n";
-      output = output + input.substr(j, max + 1 - j);
-      cout << input.substr(j, max + 1 - j) << "\n";
-      j = max;
-    } else {
-      output.push_back('@');
-      output.push_back(input[j]);
-
+    
+    if(curr_state>=0 && get < 2 > (dfa[curr_state])){
+        return true;
     }
+    return false;
+}
 
-    //if(curr_state>=0&&get<2>(min_dfa[curr_state]))cout<<"Accepted"; else cout<<"Rejected";
-
-  }
-  output.push_back('#');
-  return output;
+string simulate(vector<int> start_st, vector<vector < tuple < int, int, bool >>> dfa_list, string input) {
+    
+    vector<pair<string,char>> ans;
+    int start = 0;
+    int end = input.size()-1;
+    while(start<end){
+        cout<<start<<" "<<end<<endl;
+        
+        for(int i = 0;i<dfa_list.size();i++){
+            string sub = input.substr(start,end-start+1);
+            if(check(sub,dfa_list[i],start_st[i])){
+                ans.push_back(make_pair(sub,(i+1)+'0'));
+                start = end+1;
+                end = input.size()-1;
+                break;
+            }
+            else{
+                end --;
+            }
+            
+            if(start == end){
+                ans.push_back(make_pair(input.substr(start,1),'0'));
+                start++;
+                end = input.size()-1;
+            }
+            
+                
+            
+        }
+    }
+    
+    string finalans;
+    
+    for(auto i: ans){
+        finalans =finalans+ "<" + i.first + "," + i.second + ">";
+    }
+    return finalans;
+    
 }
 
 int main() {
-  ifstream myfile;
-  myfile.open("input.txt");
+//   ifstream myfile;
+//   myfile.open("input.txt");
   string regex, toCheck;
-  getline(myfile, toCheck);
+  toCheck = "babbbbabbbabbbaaabba";
+  vector<string> hardcode = {"(((((a)(b))|((b)(a)))(((a)|(b))?))+)"};
+
+//   getline(myfile, toCheck);
   
   vector<vector < tuple < int, int, bool > >> dfa_list;
   
   vector<int> start_st;
-  
-  while(true){
+  int i = 0;
+  while(i<hardcode.size()){
       string regex;
-      getline(myfile,regex);
+      regex = hardcode[i];
+      i++;
+    //   getline(myfile,regex);
       string regexp, postfix;
       regexp = regex;
       dispregex = regexp;
@@ -491,15 +511,17 @@ int main() {
       set < int > si;
       queue < set < int > > que;
       nfa_to_dfa(si, que, start_state);
-    
+
       pair < int, vector < tuple < int, int, bool > > > min_dfa_tmp = minimize_dfa(dfa);
     
       vector < tuple < int, int, bool > > min_dfa = min_dfa_tmp.second;
-      dfa_list.push_back(min_dfa)
+      dfa_list.push_back(min_dfa);
       start_st.push_back(min_dfa_tmp.first);
-      if(myfile.eof())break;
+
       while(!st.empty())
-      st.pop();
+        {st.pop();}
+      nfa.clear();
+      dfa.clear();
   }
   
   
@@ -507,8 +529,8 @@ int main() {
 
   string op = simulate(start_st, dfa_list, toCheck);
   cout << "output=" << op;
-  ofstream out;
-  out.open("output.txt");
-  out << op;
+//   ofstream out;
+//   out.open("output.txt");
+//   cout << op;
   return 0;
 }
