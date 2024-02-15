@@ -22,7 +22,7 @@ vector < dst > dfa;
 stack < int > st;
 
 int nfa_size, dfa_size;
-string dispregex;
+
 
 struct nst init_nfa_state;
 
@@ -219,17 +219,7 @@ string regexp_to_postfix(string regexp) {
 
 /***************************** nfa to dfa ****************************/
 
-void print_dfa() {
-  cout << endl;
-  cout << "NFA TO DFA CONVERSION" << endl;
-  cout << "---------------------------------------------------------" << endl;
-  cout << "STATE\t|\t" << "a" << "\t|\t" << "b" << "\t|\t" << "FINAL" << "\t|" << endl;
-  cout << "---------------------------------------------------------" << endl;
-  for (int i = 0; i < dfa.size(); i++) {
-    cout << i << "\t|\t" << dfa[i].a[0] << "\t|\t" << dfa[i].a[1] << "\t|\t" << dfa[i].f << "\t|" << endl;
-  }
-  cout << "---------------------------------------------------------" << endl;
-}
+
 
 void epsilon_closure(int state, set < int > & si) {
   for (unsigned int i = 0; i < nfa[state].e.size(); i++) {
@@ -477,26 +467,21 @@ string simulate(vector<int> start_st, vector<vector < tuple < int, int, bool >>>
 }
 
 int main() {
-//   ifstream myfile;
-//   myfile.open("input.txt");
+  ifstream myfile;
+  myfile.open("input.txt");
   string regex, toCheck;
-  toCheck = "babbbbabbbabbbaaabba";
-  vector<string> hardcode = {"(((((a)(b))|((b)(a)))(((a)|(b))?))+)"};
 
-//   getline(myfile, toCheck);
+  getline(myfile, toCheck);
   
   vector<vector < tuple < int, int, bool > >> dfa_list;
   
   vector<int> start_st;
   int i = 0;
-  while(i<hardcode.size()){
-      string regex;
-      regex = hardcode[i];
-      i++;
-    //   getline(myfile,regex);
+  while(getline(myfile,regex)){
+
+      
       string regexp, postfix;
       regexp = regex;
-      dispregex = regexp;
       regexp = insert_concat(regexp);
       postfix = regexp_to_postfix(regexp);
       cout << "Postfix Expression: " << postfix << endl;
@@ -517,20 +502,23 @@ int main() {
       vector < tuple < int, int, bool > > min_dfa = min_dfa_tmp.second;
       dfa_list.push_back(min_dfa);
       start_st.push_back(min_dfa_tmp.first);
+      
 
       while(!st.empty())
         {st.pop();}
       nfa.clear();
       dfa.clear();
+      nfa_size = 0;
+      dfa_size = 0;
+      init_dfa_state={};
+      init_nfa_state={};
   }
-  
-  
-  
+
 
   string op = simulate(start_st, dfa_list, toCheck);
   cout << "output=" << op;
-//   ofstream out;
-//   out.open("output.txt");
-//   cout << op;
+  ofstream out;
+  out.open("output.txt");
+  out << op;
   return 0;
 }
