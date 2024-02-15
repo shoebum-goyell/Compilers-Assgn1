@@ -431,8 +431,8 @@ string simulate(vector<int> start_st, vector<vector < tuple < int, int, bool >>>
     vector<pair<string,char>> ans;
     int start = 0;
     int end = input.size()-1;
-    while(start<end){
-        cout<<start<<" "<<end<<endl;
+    while(start<=end){
+        
         
         for(int i = 0;i<dfa_list.size();i++){
             string sub = input.substr(start,end-start+1);
@@ -443,11 +443,15 @@ string simulate(vector<int> start_st, vector<vector < tuple < int, int, bool >>>
                 break;
             }
             else{
-                end --;
+                if(i == dfa_list.size()-1)
+                    end --;
             }
             
             if(start == end){
-                ans.push_back(make_pair(input.substr(start,1),'0'));
+                if(check(input.substr(start,1),dfa_list[i],start_st[i])){
+                    ans.push_back(make_pair(input.substr(start,1),(i+1)+'0'));
+                }
+                else ans.push_back(make_pair(input.substr(start,1),'0'));
                 start++;
                 end = input.size()-1;
             }
@@ -514,11 +518,12 @@ int main() {
       init_nfa_state={};
   }
 
-
+    myfile.close();
   string op = simulate(start_st, dfa_list, toCheck);
   cout << "output=" << op;
   ofstream out;
   out.open("output.txt");
   out << op;
+  out.close();
   return 0;
 }
