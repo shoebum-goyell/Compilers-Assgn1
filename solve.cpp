@@ -313,99 +313,6 @@ void nfa_to_dfa(set < int > & si, queue < set < int > > & que, int start_state) 
   dfa[p].a[1] = p;
   //cout<<p<<endl;
 }
-
-/***************************** min dfa ****************************/
-
-/// Function to minimize DFA
-pair < int, vector < tuple < int, int, bool > > > minimize_dfa(vector < dst > dfa) {
-  //cout<<dfa.size()<<endl;
-  vector < int > grp(dfa.size()); /// Group number for states
-  vector < vector < int > > part(2, vector < int > ()); /// Partition for groups
-
-  /// Initializing the groups
-  part[0].push_back(0);
-  for (int i = 1; i < (int) grp.size(); i++) {
-    if (dfa[i].f == dfa[0].f) {
-      grp[i] = 0;
-      part[0].push_back(i);
-    } else {
-      grp[i] = 1;
-      part[1].push_back(i);
-    }
-  }
-
-  if (!part[1].size()) part.erase(part.end());
-
-  /// Loop until no new partition is created
-  bool chk = true; /// Check if any new partition is created
-  int strt = 0; /// Starting State
-  while (chk) {
-    chk = false;
-
-    /*for(int i=0; i<part.size(); i++) {
-        cout<<i<<":";
-        for(int j=0; j<part[i].size(); j++) {
-            cout<<part[i][j]<<" ";
-        } cout<<endl;
-    } cout<<endl;*/
-    /// Iterate over partitions and alphabets
-    for (int i = 0; i < part.size(); i++) {
-      for (int j = 0; j < 2; j++) {
-        vector < pair < int, int > > trans(part[i].size()); /// Transitions for the states of partitions
-        /// Iterate over states of partitions and find transition groups
-        for (int k = 0; k < part[i].size(); k++) {
-          if (dfa[part[i][k]].a[j] >= 0)
-            trans[k] = make_pair(grp[dfa[part[i][k]].a[j]], part[i][k]);
-          else
-            trans[k] = make_pair(-1, part[i][k]);
-        }
-        sort(trans.begin(), trans.end());
-
-        /// Break partition in case of different transitions
-        if (trans[0].first != trans[trans.size() - 1].first) {
-          chk = true;
-
-          int k, m = part.size() - 1;
-
-          part[i].clear();
-          part[i].push_back(trans[0].second);
-          for (k = 1; k < trans.size() and(trans[k].first == trans[k - 1].first); k++) {
-            part[i].push_back(trans[k].second);
-          }
-
-          while (k < trans.size()) {
-            if (trans[k].first != trans[k - 1].first) {
-              part.push_back(vector < int > ());
-              m++;
-            }
-            grp[trans[k].second] = m;
-            part[m].push_back(trans[k].second);
-            k++;
-          }
-        }
-      }
-    }
-  }
-
-  for (int i = 0; i < part.size(); i++) {
-    for (int j = 0; j < part[i].size(); j++) {
-      if (part[i][j] == 0) strt = i;
-    }
-  }
-
-  vector < tuple < int, int, bool > > ret(part.size());
-  //cout<<part.size()<<endl;
-  //sort(part.begin(), part.end());
-  for (int i = 0; i < (int) part.size(); i++) {
-    //cout<<grp[part[i][0]]<<endl;
-    get < 0 > (ret[i]) = (dfa[part[i][0]].a[0] >= 0) ? grp[dfa[part[i][0]].a[0]] : -1;
-    get < 1 > (ret[i]) = (dfa[part[i][0]].a[1] >= 0) ? grp[dfa[part[i][0]].a[1]] : -1;
-    get < 2 > (ret[i]) = dfa[part[i][0]].f;
-  }
-
-  return make_pair(strt, ret);
-}
-
 bool check(string toCheck, vector<tuple<int,int,bool>> dfa,int start_state){
     int curr_state, next_state;
     curr_state = start_state;
@@ -501,11 +408,12 @@ int main() {
       queue < set < int > > que;
       nfa_to_dfa(si, que, start_state);
 
-      pair < int, vector < tuple < int, int, bool > > > min_dfa_tmp = minimize_dfa(dfa);
-    
-      vector < tuple < int, int, bool > > min_dfa = min_dfa_tmp.second;
-      dfa_list.push_back(min_dfa);
-      start_st.push_back(min_dfa_tmp.first);
+      vector<tuple<int, int, bool>> dfa_copy;
+      for(const auto& state : dfa) {
+          dfa_copy.push_back({state.a[0], state.a[1], state.f});
+      }
+      dfa_list.push_back(dfa_copy);
+      start_st.push_back(0);
       
 
       while(!st.empty())
@@ -518,7 +426,7 @@ int main() {
       init_nfa_state={};
   }
 
-    myfile.close();
+  myfile.close();
   string op = simulate(start_st, dfa_list, toCheck);
   cout << "output=" << op;
   ofstream out;
